@@ -4,8 +4,9 @@ Freqtrade gained open interest candles on 2026-08-30. Before building a
 strategy on them, two things decide whether the idea is testable at all:
 
   1. HOW FAR BACK the exchange serves open interest. This is nothing like
-     candle history. One major venue serves roughly a month and rejects
-     anything older outright.
+     candle history, and venues differ by orders of magnitude: one major
+     venue serves roughly a month and rejects anything older outright,
+     another serves back to the instrument's listing date.
 
   2. WHICH COLUMN carries data. Freqtrade exposes `open_interest_amount`
      (base currency) and `open_interest_value` (quote currency). Exchanges
@@ -26,7 +27,7 @@ import urllib.error
 import urllib.request
 
 TIMEOUT = 20
-PROBE_DAYS = (7, 30, 90, 180, 365, 730)
+PROBE_DAYS = (7, 30, 90, 365, 730, 1460, 2190)
 
 
 def fetch(url):

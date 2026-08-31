@@ -13,7 +13,7 @@ python check_oi_coverage.py          # runs against the live public APIs, no key
 
 ---
 
-## 1. History depth is the constraint, and venues differ by 20x
+## 1. History depth is the constraint, and venues differ by two orders of magnitude
 
 Open interest history is nothing like candle history. Measured just now, 1h
 open interest, 48-hour probe window ending N days ago:
@@ -22,15 +22,26 @@ open interest, 48-hour probe window ending N days ago:
 |---|---|---|
 | 7 | 48 rows | 48 rows |
 | 30 | 48 rows | **HTTP 400** |
-| 90 | 48 rows | **HTTP 400** |
 | 365 | 48 rows | **HTTP 400** |
-| 730 | **48 rows** | **HTTP 400** |
+| 730 | 48 rows | **HTTP 400** |
+| 1460 | 48 rows | **HTTP 400** |
+| 2190 | **48 rows** | **HTTP 400** |
 
-**Bybit serves two years. Binance refuses anything past about a month** — and
-refuses it outright with a 400, rather than returning an empty window.
+**Binance refuses anything past about a month** — and refuses it outright with
+a 400, rather than returning an empty window.
+
+**Bybit serves open interest back to close to the instrument's listing date.**
+BTCUSDT returns data from 2020-08, ETHUSDT from 2021-08; each stops only where
+the instrument itself does, not at a fixed retention window.
+
+The windows were checked to land where requested: returned timestamps match the
+range asked for, and the open interest values differ per period — so this is
+genuine history, not recent data echoed back for an out-of-range request. That
+check matters, because plenty of APIs silently ignore time parameters, and
+"lots of rows returned" would otherwise prove nothing.
 
 The Freqtrade docs warn that Binance "only serves the last 30 days". What they
-don't say is that another supported venue serves 730 days of the same data.
+don't say is that another supported venue serves years of the same data.
 
 The practical consequence: **download open interest from the venue that has the
 history, even if you intend to execute somewhere else.** For a backtest, depth
